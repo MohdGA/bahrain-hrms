@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../store/authStore';
+import { useAuth } from '../store/authStore.jsx';
 import toast from 'react-hot-toast';
 
 export default function Login() {

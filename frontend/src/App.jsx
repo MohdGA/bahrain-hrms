@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { AuthProvider, useAuth } from './store/authStore';
+import { AuthProvider, useAuth } from './store/authStore.jsx';
 import AppLayout   from './components/Layout/AppLayout';
 import Dashboard   from './pages/Dashboard';
 import Employees   from './pages/Employees';
