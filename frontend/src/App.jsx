@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from './store/authStore.jsx';
 import AppLayout   from './components/Layout/AppLayout';
 import Dashboard   from './pages/Dashboard';
 import Employees   from './pages/Employees';
+import Schedule    from './pages/Schedule';
+import Analytics   from './pages/Analytics';
 import WPS         from './pages/WPS';
 import SIO         from './pages/SIO';
 import Login       from './pages/Login';
@@ -25,12 +27,12 @@ function AppRoutes() {
             <Routes>
               <Route path="/"            element={<Dashboard />} />
               <Route path="/employees"   element={<Employees />} />
+              <Route path="/schedule"    element={<Schedule />} />
+              <Route path="/analytics"   element={<Analytics />} />
               <Route path="/wps"         element={<WPS />} />
               <Route path="/sio"         element={<SIO />} />
               <Route path="/recruitment" element={<Placeholder title="Recruitment" />} />
               <Route path="/performance" element={<Placeholder title="Performance" />} />
-              <Route path="/schedule"    element={<Placeholder title="Schedule" />} />
-              <Route path="/analytics"   element={<Placeholder title="Analytics" />} />
               <Route path="/projects"    element={<Placeholder title="Projects" />} />
               <Route path="/settings"    element={<Placeholder title="Settings" />} />
               <Route path="/help"        element={<Placeholder title="Help & Support" />} />

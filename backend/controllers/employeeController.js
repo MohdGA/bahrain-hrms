@@ -1,6 +1,7 @@
 const Employee = require('../models/Employee');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const bcrypt   = require('bcryptjs');
+const jwt      = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });

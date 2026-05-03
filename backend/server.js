@@ -19,10 +19,12 @@ const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 app.use('/api/', limiter);
 
 // Routes
-app.use('/api/employees', require('./routes/employees'));
-app.use('/api/payroll',   require('./routes/payroll'));
-app.use('/api/wps',       require('./routes/wps'));
-app.use('/api/documents', require('./routes/documents'));
+app.use('/api/employees',  require('./routes/employees'));
+app.use('/api/payroll',    require('./routes/payroll'));
+app.use('/api/wps',        require('./routes/wps'));
+app.use('/api/documents',  require('./routes/documents'));
+app.use('/api/dashboard',  require('./routes/dashboard'));
+app.use('/api/leave',      require('./routes/leave'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 
