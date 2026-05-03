@@ -10,6 +10,8 @@ router.get('/', protect, authorize('admin', 'hr_officer', 'finance_manager', 'wr
 router.get('/bahrainisation', protect, ctrl.getBahrainisationStats);
 router.get('/:id', protect, audit('READ', 'Employee'), ctrl.getEmployee);
 router.put('/:id', protect, authorize('admin', 'hr_officer'), audit('UPDATE', 'Employee'), ctrl.updateEmployee);
-router.post('/pdpl-consent', protect, ctrl.signPDPLConsent);
+router.post('/pdpl-consent',  protect, ctrl.signPDPLConsent);
+router.put('/:id/status',    protect, authorize('admin','hr_officer'), ctrl.updateStatus);
+router.delete('/:id',        protect, authorize('admin'), ctrl.deleteEmployee);
 
 module.exports = router;

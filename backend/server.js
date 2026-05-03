@@ -24,7 +24,11 @@ app.use('/api/payroll',    require('./routes/payroll'));
 app.use('/api/wps',        require('./routes/wps'));
 app.use('/api/documents',  require('./routes/documents'));
 app.use('/api/dashboard',  require('./routes/dashboard'));
-app.use('/api/leave',      require('./routes/leave'));
+app.use('/api/leave',       require('./routes/leave'));
+app.use('/api/recruitment', require('./routes/recruitment'));
+app.use('/api/performance', require('./routes/performance'));
+app.use('/api/projects',    require('./routes/projects'));
+app.use('/api/settings',    require('./routes/settings'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 

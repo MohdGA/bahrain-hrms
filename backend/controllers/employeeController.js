@@ -102,6 +102,24 @@ exports.getBahrainisationStats = async (req, res) => {
   }
 };
 
+exports.deleteEmployee = async (req, res) => {
+  try {
+    await Employee.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Employee deleted' });
+  } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+};
+
+exports.updateStatus = async (req, res) => {
+  try {
+    const employee = await Employee.findByIdAndUpdate(
+      req.params.id,
+      { status: req.body.status, endDate: req.body.status !== 'Active' ? new Date() : undefined },
+      { new: true }
+    ).select('-password');
+    res.json({ success: true, data: employee });
+  } catch (err) { res.status(400).json({ success: false, message: err.message }); }
+};
+
 exports.signPDPLConsent = async (req, res) => {
   try {
     const employee = await Employee.findByIdAndUpdate(
