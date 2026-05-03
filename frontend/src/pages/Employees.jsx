@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Plus, Filter, X, ChevronDown } from 'lucide-react';
+import { Search, Plus, X, AlertCircle, CheckCircle2 } from 'lucide-react';
 import api from '../utils/api';
 import useFetch from '../hooks/useFetch';
 import toast from 'react-hot-toast';
@@ -27,63 +27,173 @@ const empty = {
   role:'employee',
 };
 
-function Field({ label, children, required }) {
+// Validate each tab and return { fieldName: 'error message' }
+function validateTab(tab, form) {
+  const errs = {};
+  if (tab === 'personal') {
+    if (!form.firstName.trim())    errs.firstName  = 'First name is required';
+    if (!form.lastName.trim())     errs.lastName   = 'Last name is required';
+    if (!form.email.trim())        errs.email      = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Enter a valid email address';
+    if (!form.nationality.trim())  errs.nationality = 'Nationality is required';
+    if (!form.cprNumber.trim())    errs.cprNumber  = 'CPR number is required';
+    else if (!/^\d{9}$/.test(form.cprNumber)) errs.cprNumber = 'CPR must be exactly 9 digits';
+    if (!form.password.trim())     errs.password   = 'Password is required';
+    else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters';
+  }
+  if (tab === 'employment') {
+    if (!form.department)   errs.department  = 'Department is required';
+    if (!form.designation.trim()) errs.designation = 'Designation is required';
+    if (!form.joinDate)     errs.joinDate    = 'Join date is required';
+  }
+  if (tab === 'salary') {
+    if (!form.basicSalary)  errs.basicSalary = 'Basic salary is required';
+    else if (isNaN(Number(form.basicSalary)) || Number(form.basicSalary) <= 0)
+      errs.basicSalary = 'Enter a valid salary (e.g. 500.000)';
+    if (form.iban && !/^BH\d{2}[A-Z0-9]{4}\d{14}$/.test(form.iban))
+      errs.iban = 'IBAN must start with BH (e.g. BH29BMAG1299123456BH00)';
+  }
+  return errs;
+}
+
+function Field({ label, error, required, children }) {
   return (
     <div>
       <label className="text-xs font-medium text-gray-600 mb-1 block">
         {label}{required && <span className="text-red-400 ml-0.5">*</span>}
       </label>
       {children}
+      {error && (
+        <p className="flex items-center gap-1 text-xs text-red-500 mt-1">
+          <AlertCircle size={11} /> {error}
+        </p>
+      )}
     </div>
   );
 }
 
-function Input({ value, onChange, type='text', placeholder, required }) {
+function Input({ value, onChange, type = 'text', placeholder, hasError }) {
   return (
-    <input type={type} value={value} onChange={onChange} placeholder={placeholder} required={required}
-      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100" />
+    <input
+      type={type} value={value} onChange={onChange} placeholder={placeholder}
+      className={clsx(
+        'w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors',
+        hasError
+          ? 'border-red-300 bg-red-50 focus:ring-red-100'
+          : 'border-gray-200 focus:ring-primary-100'
+      )}
+    />
   );
 }
 
-function Select({ value, onChange, options, required }) {
+function SelectInput({ value, onChange, options, hasError }) {
   return (
-    <select value={value} onChange={onChange} required={required}
-      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100">
+    <select
+      value={value} onChange={onChange}
+      className={clsx(
+        'w-full border rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 transition-colors',
+        hasError
+          ? 'border-red-300 bg-red-50 focus:ring-red-100'
+          : 'border-gray-200 focus:ring-primary-100'
+      )}
+    >
       <option value="">Select...</option>
-      {options.map(o => <option key={o.value ?? o} value={o.value ?? o}>{o.label ?? o}</option>)}
+      {options.map(o => <option key={o}>{o}</option>)}
     </select>
   );
 }
 
+const TABS = ['personal', 'employment', 'salary', 'documents'];
+const TAB_LABELS = { personal: 'Personal', employment: 'Employment', salary: 'Salary', documents: 'Documents' };
+
 export default function Employees() {
-  const [search, setSearch]         = useState('');
-  const [filterStatus, setFilter]   = useState('');
-  const [showModal, setShowModal]   = useState(false);
-  const [saving, setSaving]         = useState(false);
-  const [form, setForm]             = useState(empty);
-  const [activeTab, setActiveTab]   = useState('personal');
+  const [search, setSearch]       = useState('');
+  const [filterStatus, setFilter] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [saving, setSaving]       = useState(false);
+  const [form, setForm]           = useState(empty);
+  const [activeTab, setActiveTab] = useState('personal');
+  const [errors, setErrors]       = useState({});
+  // Track which tabs have been validated (to show checkmarks)
+  const [tabsDone, setTabsDone]   = useState({});
 
   const { data: employees, loading, refetch } = useFetch('/employees?limit=100');
 
   const set = (field) => (e) => {
     const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm(f => ({ ...f, [field]: val }));
+    // Clear the error for this field as user types
+    if (errors[field]) setErrors(prev => { const n = {...prev}; delete n[field]; return n; });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const goToTab = (tab) => {
+    // Validate current tab before moving forward
+    const currentIdx = TABS.indexOf(activeTab);
+    const targetIdx  = TABS.indexOf(tab);
+    if (targetIdx > currentIdx) {
+      const errs = validateTab(activeTab, form);
+      if (Object.keys(errs).length) { setErrors(errs); return; }
+      setTabsDone(p => ({ ...p, [activeTab]: true }));
+      setErrors({});
+    }
+    setActiveTab(tab);
+  };
+
+  const handleNext = () => {
+    const errs = validateTab(activeTab, form);
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setTabsDone(p => ({ ...p, [activeTab]: true }));
+    setErrors({});
+    const next = TABS[TABS.indexOf(activeTab) + 1];
+    if (next) setActiveTab(next);
+  };
+
+  const handleSubmit = async () => {
+    // Validate all required tabs before final submit
+    const allErrs = {};
+    ['personal','employment','salary'].forEach(t => {
+      Object.assign(allErrs, validateTab(t, form));
+    });
+    if (Object.keys(allErrs).length) {
+      // Jump to first tab with errors
+      const errTab = ['personal','employment','salary'].find(t => Object.keys(validateTab(t, form)).length);
+      setActiveTab(errTab);
+      setErrors(validateTab(errTab, form));
+      return;
+    }
     setSaving(true);
     try {
       await api.post('/employees/register', form);
       toast.success('Employee added successfully!');
       setShowModal(false);
       setForm(empty);
+      setErrors({});
+      setTabsDone({});
+      setActiveTab('personal');
       refetch();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add employee');
+      // Parse backend errors and show them inline
+      const msg = err.response?.data?.message || '';
+      if (msg.toLowerCase().includes('email')) {
+        setActiveTab('personal');
+        setErrors({ email: 'This email is already registered' });
+      } else if (msg.toLowerCase().includes('cpr')) {
+        setActiveTab('personal');
+        setErrors({ cprNumber: 'This CPR number already exists' });
+      } else {
+        toast.error(msg || 'Failed to add employee');
+      }
     } finally {
       setSaving(false);
     }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setForm(empty);
+    setErrors({});
+    setTabsDone({});
+    setActiveTab('personal');
   };
 
   const filtered = (employees || []).filter(e => {
@@ -92,8 +202,6 @@ export default function Employees() {
     const matchStatus = filterStatus ? e.status === filterStatus : true;
     return matchSearch && matchStatus;
   });
-
-  const tabs = ['personal','employment','salary','documents'];
 
   return (
     <div className="space-y-5">
@@ -166,79 +274,113 @@ export default function Employees() {
         )}
       </div>
 
-      {/* Add Employee Modal */}
+      {/* ── Add Employee Modal ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
-            {/* Modal header */}
+
+            {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">Add New Employee</h2>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={closeModal} className="text-gray-400 hover:text-gray-600 transition-colors">
                 <X size={18} />
               </button>
             </div>
 
             {/* Tabs */}
             <div className="flex border-b border-gray-100 px-6">
-              {tabs.map(t => (
-                <button key={t} onClick={() => setActiveTab(t)}
-                  className={clsx('px-4 py-2.5 text-xs font-medium capitalize border-b-2 transition-colors',
-                    activeTab === t ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-gray-600')}>
-                  {t}
+              {TABS.map(t => (
+                <button key={t} onClick={() => goToTab(t)}
+                  className={clsx(
+                    'flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium border-b-2 transition-colors',
+                    activeTab === t
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-gray-400 hover:text-gray-600'
+                  )}>
+                  {tabsDone[t] && <CheckCircle2 size={12} className="text-green-500" />}
+                  {TAB_LABELS[t]}
                 </button>
               ))}
             </div>
 
-            <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-6 py-4">
+            {/* Form body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5">
+
+              {/* ── Personal ── */}
               {activeTab === 'personal' && (
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="First Name (EN)" required><Input value={form.firstName} onChange={set('firstName')} placeholder="James" required /></Field>
-                  <Field label="Last Name (EN)" required><Input value={form.lastName} onChange={set('lastName')} placeholder="Franklyn" required /></Field>
-                  <Field label="الاسم الأول"><Input value={form.firstNameAr} onChange={set('firstNameAr')} placeholder="جيمس" /></Field>
-                  <Field label="اسم العائلة"><Input value={form.lastNameAr} onChange={set('lastNameAr')} placeholder="فرانكلين" /></Field>
-                  <Field label="Email" required><Input type="email" value={form.email} onChange={set('email')} placeholder="james@company.com" required /></Field>
-                  <Field label="Phone"><Input value={form.phone} onChange={set('phone')} placeholder="+973 3X XX XXXX" /></Field>
-                  <Field label="Date of Birth"><Input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
+                  <Field label="First Name (EN)" required error={errors.firstName}>
+                    <Input value={form.firstName} onChange={set('firstName')} placeholder="James" hasError={!!errors.firstName} />
+                  </Field>
+                  <Field label="Last Name (EN)" required error={errors.lastName}>
+                    <Input value={form.lastName} onChange={set('lastName')} placeholder="Franklyn" hasError={!!errors.lastName} />
+                  </Field>
+                  <Field label="الاسم الأول">
+                    <Input value={form.firstNameAr} onChange={set('firstNameAr')} placeholder="جيمس" />
+                  </Field>
+                  <Field label="اسم العائلة">
+                    <Input value={form.lastNameAr} onChange={set('lastNameAr')} placeholder="فرانكلين" />
+                  </Field>
+                  <Field label="Email" required error={errors.email}>
+                    <Input type="email" value={form.email} onChange={set('email')} placeholder="james@company.com" hasError={!!errors.email} />
+                  </Field>
+                  <Field label="Phone">
+                    <Input value={form.phone} onChange={set('phone')} placeholder="+973 3X XX XXXX" />
+                  </Field>
+                  <Field label="Date of Birth">
+                    <Input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} />
+                  </Field>
                   <Field label="Gender">
-                    <Select value={form.gender} onChange={set('gender')} options={['Male','Female']} />
+                    <SelectInput value={form.gender} onChange={set('gender')} options={['Male','Female']} />
                   </Field>
-                  <Field label="Nationality" required><Input value={form.nationality} onChange={set('nationality')} placeholder="Bahraini / Indian / ..." required /></Field>
-                  <Field label="Religion"><Input value={form.religion} onChange={set('religion')} placeholder="Muslim / Christian / ..." /></Field>
-                  <Field label="CPR Number" required>
-                    <Input value={form.cprNumber} onChange={set('cprNumber')} placeholder="900000001 (9 digits)" required />
+                  <Field label="Nationality" required error={errors.nationality}>
+                    <Input value={form.nationality} onChange={set('nationality')} placeholder="Bahraini / Indian / ..." hasError={!!errors.nationality} />
                   </Field>
-                  <Field label="Is Bahraini?">
-                    <label className="flex items-center gap-2 mt-2 cursor-pointer">
-                      <input type="checkbox" checked={form.isBahraini} onChange={set('isBahraini')} className="rounded" />
+                  <Field label="Religion">
+                    <Input value={form.religion} onChange={set('religion')} placeholder="Muslim / Christian / ..." />
+                  </Field>
+                  <Field label="CPR Number" required error={errors.cprNumber}>
+                    <Input value={form.cprNumber} onChange={set('cprNumber')} placeholder="900000001 (9 digits)" hasError={!!errors.cprNumber} />
+                  </Field>
+                  <Field label="Is Bahraini National?">
+                    <label className="flex items-center gap-2 mt-2 cursor-pointer select-none">
+                      <input type="checkbox" checked={form.isBahraini} onChange={set('isBahraini')}
+                        className="w-4 h-4 accent-primary rounded" />
                       <span className="text-sm text-gray-700">Yes, Bahraini national</span>
                     </label>
                   </Field>
-                  <Field label="Password" required>
-                    <Input type="password" value={form.password} onChange={set('password')} placeholder="Temp password" required />
+                  <Field label="Password" required error={errors.password}>
+                    <Input type="password" value={form.password} onChange={set('password')} placeholder="Temporary password" hasError={!!errors.password} />
                   </Field>
                   <Field label="Role">
-                    <Select value={form.role} onChange={set('role')} options={ROLES} />
+                    <SelectInput value={form.role} onChange={set('role')} options={ROLES} />
                   </Field>
                 </div>
               )}
 
+              {/* ── Employment ── */}
               {activeTab === 'employment' && (
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="Department" required>
-                    <Select value={form.department} onChange={set('department')} options={DEPARTMENTS} required />
+                  <Field label="Department" required error={errors.department}>
+                    <SelectInput value={form.department} onChange={set('department')} options={DEPARTMENTS} hasError={!!errors.department} />
                   </Field>
-                  <Field label="Designation" required><Input value={form.designation} onChange={set('designation')} placeholder="Software Engineer" required /></Field>
+                  <Field label="Designation" required error={errors.designation}>
+                    <Input value={form.designation} onChange={set('designation')} placeholder="e.g. Software Engineer" hasError={!!errors.designation} />
+                  </Field>
                   <Field label="Employment Type">
-                    <Select value={form.employmentType} onChange={set('employmentType')} options={['Full-Time','Part-Time','Contract']} />
+                    <SelectInput value={form.employmentType} onChange={set('employmentType')} options={['Full-Time','Part-Time','Contract']} />
                   </Field>
-                  <Field label="Join Date" required><Input type="date" value={form.joinDate} onChange={set('joinDate')} required /></Field>
+                  <Field label="Join Date" required error={errors.joinDate}>
+                    <Input type="date" value={form.joinDate} onChange={set('joinDate')} hasError={!!errors.joinDate} />
+                  </Field>
                 </div>
               )}
 
+              {/* ── Salary ── */}
               {activeTab === 'salary' && (
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="Basic Salary (BHD)" required>
-                    <Input value={form.basicSalary} onChange={set('basicSalary')} placeholder="500.000" required />
+                  <Field label="Basic Salary (BHD)" required error={errors.basicSalary}>
+                    <Input value={form.basicSalary} onChange={set('basicSalary')} placeholder="500.000" hasError={!!errors.basicSalary} />
                   </Field>
                   <Field label="Housing Allowance (BHD)">
                     <Input value={form.housingAllowance} onChange={set('housingAllowance')} placeholder="0.000" />
@@ -249,8 +391,8 @@ export default function Employees() {
                   <Field label="Social Allowance (BHD)">
                     <Input value={form.socialAllowance} onChange={set('socialAllowance')} placeholder="0.000" />
                   </Field>
-                  <Field label="IBAN (BH format)">
-                    <Input value={form.iban} onChange={set('iban')} placeholder="BH29BMAG1299123456BH00" />
+                  <Field label="IBAN (BH format)" error={errors.iban}>
+                    <Input value={form.iban} onChange={set('iban')} placeholder="BH29BMAG1299123456BH00" hasError={!!errors.iban} />
                   </Field>
                   <Field label="Bank Name">
                     <Input value={form.bankName} onChange={set('bankName')} placeholder="Bank of Bahrain and Kuwait" />
@@ -258,36 +400,52 @@ export default function Employees() {
                 </div>
               )}
 
+              {/* ── Documents ── */}
               {activeTab === 'documents' && (
                 <div className="grid grid-cols-2 gap-4">
-                  <Field label="CPR Expiry"><Input type="date" value={form.cprExpiry} onChange={set('cprExpiry')} /></Field>
-                  <Field label="Passport Number"><Input value={form.passportNumber} onChange={set('passportNumber')} placeholder="A12345678" /></Field>
-                  <Field label="Passport Expiry"><Input type="date" value={form.passportExpiry} onChange={set('passportExpiry')} /></Field>
-                  <Field label="Work Permit Number"><Input value={form.workPermitNumber} onChange={set('workPermitNumber')} placeholder="WP-2026-XXXXX" /></Field>
-                  <Field label="Work Permit Expiry"><Input type="date" value={form.workPermitExpiry} onChange={set('workPermitExpiry')} /></Field>
+                  <Field label="CPR Expiry">
+                    <Input type="date" value={form.cprExpiry} onChange={set('cprExpiry')} />
+                  </Field>
+                  <Field label="Passport Number">
+                    <Input value={form.passportNumber} onChange={set('passportNumber')} placeholder="A12345678" />
+                  </Field>
+                  <Field label="Passport Expiry">
+                    <Input type="date" value={form.passportExpiry} onChange={set('passportExpiry')} />
+                  </Field>
+                  <Field label="Work Permit Number">
+                    <Input value={form.workPermitNumber} onChange={set('workPermitNumber')} placeholder="WP-2026-XXXXX" />
+                  </Field>
+                  <Field label="Work Permit Expiry">
+                    <Input type="date" value={form.workPermitExpiry} onChange={set('workPermitExpiry')} />
+                  </Field>
                 </div>
               )}
-            </form>
+            </div>
 
-            {/* Modal footer */}
+            {/* Footer */}
             <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-              <div className="flex gap-2">
-                {tabs.map((t, i) => (
-                  <button key={t} onClick={() => setActiveTab(t)}
-                    className={clsx('w-2 h-2 rounded-full transition-all', activeTab === t ? 'bg-primary w-4' : 'bg-gray-200')} />
+              {/* Step dots */}
+              <div className="flex gap-1.5">
+                {TABS.map(t => (
+                  <button key={t} onClick={() => goToTab(t)}
+                    className={clsx('h-2 rounded-full transition-all', activeTab === t ? 'w-5 bg-primary' : tabsDone[t] ? 'w-2 bg-green-400' : 'w-2 bg-gray-200')} />
                 ))}
               </div>
               <div className="flex gap-2">
-                <button type="button" onClick={() => setShowModal(false)} className="btn-outline text-xs">Cancel</button>
+                <button type="button" onClick={closeModal} className="btn-outline text-xs">Cancel</button>
                 {activeTab !== 'documents' ? (
-                  <button type="button" onClick={() => setActiveTab(tabs[tabs.indexOf(activeTab)+1])} className="btn-primary text-xs">Next →</button>
+                  <button type="button" onClick={handleNext} className="btn-primary text-xs">
+                    Next →
+                  </button>
                 ) : (
-                  <button type="button" onClick={handleSubmit} disabled={saving} className="btn-primary text-xs disabled:opacity-60">
+                  <button type="button" onClick={handleSubmit} disabled={saving}
+                    className="btn-primary text-xs disabled:opacity-60 min-w-[110px]">
                     {saving ? 'Saving...' : 'Add Employee'}
                   </button>
                 )}
               </div>
             </div>
+
           </div>
         </div>
       )}
