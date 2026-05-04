@@ -9,14 +9,23 @@ const signToken = (id) =>
 
 exports.register = async (req, res) => {
   try {
-    const { password, ...rest } = req.body;
+    const { password, position, ...rest } = req.body;
     const hashed = await bcrypt.hash(password, 12);
 
     // Auto-generate employeeId
     const count = await Employee.countDocuments();
     const employeeId = `EMP-${String(count + 1).padStart(4, '0')}`;
 
-    const employee = await Employee.create({ ...rest, employeeId, password: hashed });
+    // Provide safe defaults for required schema fields not collected at sign-up
+    const defaults = {
+      designation:  position || 'Employee',
+      nationality:  'Not Specified',
+      cprNumber:    `PENDING-${employeeId}`,
+      basicSalary:  mongoose.Types.Decimal128.fromString('0'),
+      joinDate:     new Date(),
+    };
+
+    const employee = await Employee.create({ ...defaults, ...rest, employeeId, password: hashed });
     const token = signToken(employee._id);
 
     // Welcome notification
@@ -30,7 +39,11 @@ exports.register = async (req, res) => {
       icon: '👋',
     });
 
-    res.status(201).json({ success: true, token, data: { employeeId: employee.employeeId, role: employee.role } });
+    res.status(201).json({
+      success: true,
+      token,
+      data: { id: employee._id, employeeId: employee.employeeId, role: employee.role, name: employee.fullName },
+    });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
   }

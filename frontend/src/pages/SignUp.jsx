@@ -20,7 +20,7 @@ function FieldError({ msg }) {
 
 export default function SignUp() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { setAuth } = useAuth();
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', confirmPassword: '',
@@ -62,13 +62,12 @@ export default function SignUp() {
     const cleanPayload = { ...payload, isBahraini };
       const res = await api.post('/employees/register', cleanPayload);
       const { token, data } = res.data;
-      login(token, data);
+      setAuth(token, data);
       setSuccess(true);
       setTimeout(() => navigate('/'), 1500);
     } catch (err) {
       const msg = err.response?.data?.message || 'Registration failed';
       if (msg.toLowerCase().includes('email')) setErrors({ email: msg });
-      else if (msg.toLowerCase().includes('cpr')) setErrors({ cprNumber: msg });
       else setErrors({ _global: msg });
     } finally {
       setLoading(false);
