@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom';
+import Logo from '../Logo';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Users, UserPlus, TrendingUp, Calendar,
@@ -36,11 +37,8 @@ export default function Sidebar() {
   return (
     <aside className="w-56 shrink-0 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0 overflow-y-auto">
       {/* Logo */}
-      <div className="px-5 py-5 flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">HR</span>
-        </div>
-        <span className="font-bold text-gray-900 text-lg">kyra.</span>
+      <div className="px-5 py-5">
+        <Logo size={34} textClass="text-lg" />
       </div>
 
       <nav className="flex-1 px-3 space-y-0.5">

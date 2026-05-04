@@ -78,7 +78,7 @@ export default function Settings() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Settings</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Configure your HRMS for Bahrain compliance</p>
+          <p className="text-sm text-gray-500 mt-0.5">Configure your TechNote workspace</p>
         </div>
         {isAdmin && (
           <button onClick={handleSave} disabled={saving} className="btn-primary flex items-center gap-2 text-xs disabled:opacity-60">

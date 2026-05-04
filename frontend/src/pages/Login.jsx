@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/authStore';
+import Logo from '../components/Logo';
 
 export default function Login() {
   const { login } = useAuth();
@@ -29,11 +30,8 @@ export default function Login() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
 
-        <div className="flex items-center gap-2 mb-8">
-          <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
-            <span className="text-white font-bold text-sm">HR</span>
-          </div>
-          <span className="text-xl font-bold text-gray-900">Bahrain HRMS</span>
+        <div className="mb-8">
+          <Logo size={36} textClass="text-xl" />
         </div>
 
         <h2 className="text-lg font-bold text-gray-900 mb-1">Sign in</h2>
