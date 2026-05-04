@@ -2,6 +2,7 @@ import { Users, UserCheck, UserMinus, Download, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import useFetch from '../hooks/useFetch';
+import { useAuth } from '../store/authStore';
 import clsx from 'clsx';
 
 const COLORS = ['#3B6FE8', '#1A45C4', '#93B4F5', '#1A1A2E', '#60A5FA', '#A78BFA'];
@@ -41,9 +42,12 @@ function Skeleton({ className = 'h-6 w-24' }) {
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const isAdmin = ['admin', 'hr_officer', 'finance_manager'].includes(user?.role);
+
   const { data: stats, loading: statsLoading }   = useFetch('/dashboard/stats');
-  const { data: recent, loading: recentLoading } = useFetch('/dashboard/recent-employees');
-  const { data: expiry, loading: expiryLoading } = useFetch('/dashboard/expiry-radar');
+  const { data: recent, loading: recentLoading } = useFetch(isAdmin ? '/dashboard/recent-employees' : null);
+  const { data: expiry, loading: expiryLoading } = useFetch(isAdmin ? '/dashboard/expiry-radar' : null);
 
   const s = stats;
 
@@ -113,7 +117,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Row 2: Bahrainisation + Expiry Radar */}
+      {/* Row 2: Bahrainisation + Expiry Radar — admin only */}
+      {isAdmin && <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bahrainisation */}
         <div className="card">
@@ -175,7 +180,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Row 3: Recent Employees + Status */}
+      {/* Row 3: Recent Employees */}
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-semibold text-gray-800">Recent Employees</h3>
@@ -221,6 +226,7 @@ export default function Dashboard() {
           </div>
         )}
       </div>
+      </>}
     </div>
   );
 }

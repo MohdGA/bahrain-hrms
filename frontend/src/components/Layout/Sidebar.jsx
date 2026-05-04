@@ -10,13 +10,13 @@ import {
 import { useAuth } from '../../store/authStore';
 
 const navItems = [
-  { to: '/',            icon: LayoutDashboard, key: 'dashboard' },
-  { to: '/employees',   icon: Users,           key: 'employee' },
-  { to: '/recruitment', icon: UserPlus,        key: 'recruitment' },
-  { to: '/performance', icon: TrendingUp,      key: 'performance' },
-  { to: '/schedule',    icon: Calendar,        key: 'schedule' },
-  { to: '/analytics',   icon: BarChart2,       key: 'analytics' },
-  { to: '/projects',    icon: FolderKanban,    key: 'projects' },
+  { to: '/',            icon: LayoutDashboard, key: 'dashboard',   roles: null },
+  { to: '/employees',   icon: Users,           key: 'employee',    roles: ['admin','hr_officer'] },
+  { to: '/recruitment', icon: UserPlus,        key: 'recruitment', roles: ['admin','hr_officer'] },
+  { to: '/performance', icon: TrendingUp,      key: 'performance', roles: null },
+  { to: '/schedule',    icon: Calendar,        key: 'schedule',    roles: null },
+  { to: '/analytics',   icon: BarChart2,       key: 'analytics',   roles: ['admin','hr_officer','finance_manager'] },
+  { to: '/projects',    icon: FolderKanban,    key: 'projects',    roles: null },
 ];
 
 const personalItems = [
@@ -53,20 +53,22 @@ export default function Sidebar({ onClose }) {
 
       <nav className="flex-1 px-3 space-y-0.5" onClick={onClose}>
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-1">General</p>
-        {navItems.map(({ to, icon: Icon, key }) => (
+        {navItems.filter(({ roles }) => !roles || roles.includes(user?.role)).map(({ to, icon: Icon, key }) => (
           <NavLink key={key} to={to} end={to === '/'} className={link(to, to === '/')}>
             <Icon size={16} />
             {t(key)}
           </NavLink>
         ))}
 
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Compliance</p>
-        {complianceItems.map(({ to, icon: Icon, key }) => (
-          <NavLink key={key} to={to} className={link(to)}>
-            <Icon size={16} />
-            {t(key)}
-          </NavLink>
-        ))}
+        {['admin','hr_officer','finance_manager','wrp'].includes(user?.role) && <>
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Compliance</p>
+          {complianceItems.map(({ to, icon: Icon, key }) => (
+            <NavLink key={key} to={to} className={link(to)}>
+              <Icon size={16} />
+              {t(key)}
+            </NavLink>
+          ))}
+        </>}
 
         <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-4 pb-1">Personal</p>
         {personalItems.map(({ to, icon: Icon, key }) => (
