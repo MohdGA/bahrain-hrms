@@ -24,8 +24,7 @@ export default function SignUp() {
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', password: '', confirmPassword: '',
-    phone: '', department: '', position: '', role: 'employee',
-    cprNumber: '', isBahraini: false,
+    department: '', position: '', role: 'employee', isBahraini: false,
   });
   const [errors, setErrors]   = useState({});
   const [showPw, setShowPw]   = useState(false);
@@ -49,7 +48,6 @@ export default function SignUp() {
     if (form.password !== form.confirmPassword) e.confirmPassword = 'Passwords do not match';
     if (!form.department)        e.department = 'Select a department';
     if (!form.position.trim())   e.position   = 'Job position is required';
-    if (form.cprNumber && !/^\d{9}$/.test(form.cprNumber)) e.cprNumber = 'CPR must be exactly 9 digits';
     return e;
   };
 
@@ -60,8 +58,9 @@ export default function SignUp() {
 
     setLoading(true);
     try {
-      const { confirmPassword, ...payload } = form;
-      const res = await api.post('/employees/register', payload);
+      const { confirmPassword, isBahraini, ...payload } = form;
+    const cleanPayload = { ...payload, isBahraini };
+      const res = await api.post('/employees/register', cleanPayload);
       const { token, data } = res.data;
       login(token, data);
       setSuccess(true);
@@ -224,30 +223,6 @@ export default function SignUp() {
                   className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 transition-colors ${errors.position ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
                 />
                 <FieldError msg={errors.position} />
-              </div>
-            </div>
-
-            {/* Phone + CPR */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-600 mb-1.5 block">Phone</label>
-                <input
-                  value={form.phone}
-                  onChange={e => set('phone', e.target.value)}
-                  placeholder="+973 3XXXXXXX"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-600 mb-1.5 block">CPR Number</label>
-                <input
-                  value={form.cprNumber}
-                  onChange={e => set('cprNumber', e.target.value)}
-                  placeholder="9-digit CPR"
-                  maxLength={9}
-                  className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary-100 transition-colors ${errors.cprNumber ? 'border-red-300 bg-red-50' : 'border-gray-200'}`}
-                />
-                <FieldError msg={errors.cprNumber} />
               </div>
             </div>
 
