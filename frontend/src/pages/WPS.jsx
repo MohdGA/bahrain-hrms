@@ -48,7 +48,7 @@ export default function WPS() {
       {/* Maker-Checker Pipeline */}
       <div className="card">
         <h2 className="font-semibold text-gray-800 mb-4">Approval Pipeline</h2>
-        <div className="flex items-center gap-0">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-0">
           {pipeline.map((step, i) => (
             <div key={step.id} className="flex items-center flex-1">
               <div className={`flex-1 flex flex-col items-center gap-2 p-4 rounded-xl
@@ -66,7 +66,7 @@ export default function WPS() {
       {/* Generate SIF */}
       <div className="card">
         <h2 className="font-semibold text-gray-800 mb-4">Generate SIF File</h2>
-        <div className="flex items-end gap-4">
+        <div className="flex flex-wrap items-end gap-3">
           <div>
             <label className="text-xs text-gray-500 mb-1 block">Month</label>
             <select value={month} onChange={e => setMonth(Number(e.target.value))}

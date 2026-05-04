@@ -70,12 +70,12 @@ export default function Projects() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Projects</h1>
           <p className="text-sm text-gray-500 mt-0.5">Track and manage all company projects</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <select value={filterStatus} onChange={e => setFilter(e.target.value)}
             className="border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none">
             <option value="">All Status</option>
@@ -203,7 +203,7 @@ export default function Projects() {
               <button onClick={() => setShowModal(false)}><X size={18} className="text-gray-400" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Project Title *</label>
                   <input value={form.title} onChange={set('title')} placeholder="e.g. HR System Upgrade"
@@ -261,7 +261,7 @@ export default function Projects() {
                 {/* Team selection */}
                 <div className="col-span-2">
                   <label className="text-xs font-medium text-gray-600 mb-2 block">Team Members</label>
-                  <div className="grid grid-cols-3 gap-2 max-h-36 overflow-y-auto">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-36 overflow-y-auto">
                     {(employees || []).map(emp => (
                       <label key={emp._id} className={clsx(
                         'flex items-center gap-2 p-2 rounded-xl border cursor-pointer transition-colors text-xs',

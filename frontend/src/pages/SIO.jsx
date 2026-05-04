@@ -29,7 +29,7 @@ export default function SIO() {
         </div>
         <span className="text-sm font-bold text-primary">Total: BHD {parseFloat(total).toFixed(3)}</span>
       </div>
-      <table className="w-full text-sm">
+      <div className="overflow-x-auto -mx-2 px-2"><table className="w-full text-sm min-w-[420px]">
         <thead>
           <tr className="text-xs text-gray-400 border-b border-gray-100">
             <th className="text-left pb-2 font-medium">Employee</th>
@@ -50,7 +50,7 @@ export default function SIO() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   );
 
@@ -61,7 +61,7 @@ export default function SIO() {
         <p className="text-sm text-gray-500 mt-0.5">2026 dual-invoice — Bahraini (18%+8%) vs Expat EOSB Fund</p>
       </div>
 
-      <div className="card flex items-end gap-4">
+      <div className="card flex flex-wrap items-end gap-3">
         <div>
           <label className="text-xs text-gray-500 mb-1 block">Month</label>
           <select value={month} onChange={e => setMonth(Number(e.target.value))}
@@ -84,7 +84,7 @@ export default function SIO() {
       </div>
 
       {/* Rates reminder */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card bg-blue-50 border-blue-100">
           <p className="font-semibold text-blue-800 text-sm">Bahraini Staff — SIO 2026</p>
           <div className="mt-2 space-y-1 text-xs text-blue-700">

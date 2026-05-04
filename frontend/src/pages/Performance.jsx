@@ -96,12 +96,12 @@ export default function Performance() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Performance</h1>
           <p className="text-sm text-gray-500 mt-0.5">KPI-based performance reviews and team scores</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex bg-gray-100 rounded-xl p-1">
             {['overview','reviews','team'].map(t => (
               <button key={t} onClick={() => setTab(t)}
@@ -150,21 +150,21 @@ export default function Performance() {
                 )}
                 {(scores || []).slice(0, 10).map((s, i) => (
                   <div key={s._id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors">
-                    <span className={clsx('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold',
+                    <span className={clsx('w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
                       i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-gray-100 text-gray-600' : i === 2 ? 'bg-orange-100 text-orange-700' : 'bg-gray-50 text-gray-400')}>
                       {i + 1}
                     </span>
-                    <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary text-xs font-bold">
+                    <div className="w-8 h-8 rounded-full bg-primary-50 flex items-center justify-center text-primary text-xs font-bold shrink-0">
                       {s.emp?.firstName?.[0]}{s.emp?.lastName?.[0]}
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-800">{s.emp?.firstName} {s.emp?.lastName}</p>
-                      <p className="text-xs text-gray-400">{s.emp?.department}</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-800 truncate">{s.emp?.firstName} {s.emp?.lastName}</p>
+                      <p className="text-xs text-gray-400 truncate">{s.emp?.department}</p>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <StarRating value={Math.round(s.avgScore)} size={14} />
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      <span className="hidden sm:flex"><StarRating value={Math.round(s.avgScore)} size={14} /></span>
                       <ScoreBadge score={s.avgScore} />
-                      <span className="text-xs text-gray-400">{s.reviews} review{s.reviews !== 1 ? 's' : ''}</span>
+                      <span className="text-xs text-gray-400 hidden sm:inline">{s.reviews} review{s.reviews !== 1 ? 's' : ''}</span>
                     </div>
                   </div>
                 ))}
@@ -186,9 +186,9 @@ export default function Performance() {
           )}
           {(reviews || []).map(r => (
             <div key={r._id} className="card">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary text-sm font-bold">
+                  <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary text-sm font-bold shrink-0">
                     {r.employee?.firstName?.[0]}{r.employee?.lastName?.[0]}
                   </div>
                   <div>
@@ -196,7 +196,7 @@ export default function Performance() {
                     <p className="text-xs text-gray-400">{r.employee?.department} · {r.period}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
                   <ScoreBadge score={r.overallScore} />
                   <span className={clsx('text-xs px-2 py-0.5 rounded-full font-medium',
                     r.status === 'Acknowledged' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700')}>
@@ -257,7 +257,7 @@ export default function Performance() {
         <div className="card">
           <h3 className="font-semibold text-gray-800 mb-4">Individual Scores</h3>
           {scLoading ? <div className="h-32 bg-gray-50 animate-pulse rounded-xl" /> : (
-            <table className="w-full text-sm">
+            <div className="overflow-x-auto -mx-2 px-2"><table className="w-full text-sm min-w-[540px]">
               <thead>
                 <tr className="text-xs text-gray-400 border-b border-gray-100">
                   <th className="text-left pb-3 font-medium">Employee</th>
@@ -298,7 +298,7 @@ export default function Performance() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           )}
         </div>
       )}

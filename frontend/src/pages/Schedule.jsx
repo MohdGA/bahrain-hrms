@@ -101,7 +101,7 @@ export default function Schedule() {
         {loading ? (
           <div className="text-center py-10 text-gray-400 text-sm">Loading...</div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-2 px-2"><table className="w-full text-sm min-w-[520px]">
             <thead>
               <tr className="text-xs text-gray-400 border-b border-gray-100">
                 {tab === 'all' && <th className="text-left pb-2 font-medium">Employee</th>}
@@ -151,7 +151,7 @@ export default function Schedule() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 

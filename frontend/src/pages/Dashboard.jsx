@@ -54,12 +54,12 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-2">
+      <div className="flex items-start justify-between flex-wrap gap-2">
         <div>
           <h1 className="text-lg md:text-xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-sm text-gray-500 mt-0.5">Live snapshot of your HR operations</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button className="btn-outline flex items-center gap-2 text-xs">
             <Calendar size={13} /> {t('thisMonth')}
           </button>

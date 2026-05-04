@@ -96,12 +96,12 @@ export default function Recruitment() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Recruitment</h1>
           <p className="text-sm text-gray-500 mt-0.5">Manage job postings and hiring pipeline</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <div className="flex bg-gray-100 rounded-xl p-1">
             {['jobs','pipeline'].map(v => (
               <button key={v} onClick={() => setView(v)}
@@ -245,7 +245,7 @@ export default function Recruitment() {
           {stats?.pipeline && (
             <div className="card">
               <p className="text-xs font-semibold text-gray-500 mb-3">Pipeline Overview</p>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 {stats.pipeline.map(p => (
                   <div key={p.stage} className="flex-1 text-center">
                     <div className={clsx('rounded-xl py-2', STAGE_COLORS[p.stage])}>
@@ -263,13 +263,13 @@ export default function Recruitment() {
       {/* Post Job Modal */}
       {showJobModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
+          <div className="bg-white rounded-none md:rounded-2xl w-full md:max-w-lg shadow-xl h-full md:h-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">Post New Job</h2>
               <button onClick={() => setShowJobModal(false)}><X size={18} className="text-gray-400" /></button>
             </div>
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Job Title *</label>
                   <input value={jobForm.title} onChange={setJ('title')} placeholder="e.g. Senior Software Engineer"
@@ -325,13 +325,13 @@ export default function Recruitment() {
       {/* Add Application Modal */}
       {showAppModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg shadow-xl">
+          <div className="bg-white rounded-none md:rounded-2xl w-full md:max-w-lg shadow-xl h-full md:h-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h2 className="font-bold text-gray-900">Add Candidate</h2>
               <button onClick={() => setShowAppModal(false)}><X size={18} className="text-gray-400" /></button>
             </div>
             <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Full Name *</label>
                   <input value={appForm.candidateName} onChange={setA('candidateName')} placeholder="John Smith"
