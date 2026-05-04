@@ -28,7 +28,9 @@ app.use('/api/leave',       require('./routes/leave'));
 app.use('/api/recruitment', require('./routes/recruitment'));
 app.use('/api/performance', require('./routes/performance'));
 app.use('/api/projects',    require('./routes/projects'));
-app.use('/api/settings',    require('./routes/settings'));
+app.use('/api/settings',       require('./routes/settings'));
+app.use('/api/notifications',  require('./routes/notifications'));
+app.use('/api/messages',       require('./routes/messages'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'OK', timestamp: new Date() }));
 

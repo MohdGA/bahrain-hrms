@@ -1,7 +1,9 @@
-import { Bell, MessageSquare, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../store/authStore';
 import i18n from '../../i18n';
+import NotificationPanel from './NotificationPanel';
+import MessagesPanel from './MessagesPanel';
 
 export default function Header() {
   const { t } = useTranslation();
@@ -19,7 +21,7 @@ export default function Header() {
     <header className="h-16 bg-white border-b border-gray-100 flex items-center px-6 gap-4 sticky top-0 z-10">
       <div className="flex-1">
         <p className="text-base font-semibold text-gray-800">
-          Hi {user?.name?.split(' ')[0] || 'James'}, {t('welcome')}! 👋
+          Hi {user?.name?.split(' ')[0] || 'there'}, {t('welcome')}! 👋
         </p>
       </div>
 
@@ -39,17 +41,11 @@ export default function Header() {
         {i18n.language === 'en' ? 'عربي' : 'EN'}
       </button>
 
-      {/* Notifications */}
-      <button className="relative w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-        <Bell size={16} className="text-gray-600" />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-      </button>
+      {/* Live Messages Panel */}
+      <MessagesPanel />
 
-      {/* Messages */}
-      <button className="relative w-9 h-9 rounded-xl bg-gray-50 flex items-center justify-center hover:bg-gray-100 transition-colors">
-        <MessageSquare size={16} className="text-gray-600" />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" />
-      </button>
+      {/* Live Notifications Panel */}
+      <NotificationPanel />
     </header>
   );
 }

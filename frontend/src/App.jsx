@@ -14,6 +14,7 @@ import Account      from './pages/Account';
 import WPS          from './pages/WPS';
 import SIO          from './pages/SIO';
 import Login        from './pages/Login';
+import SignUp        from './pages/SignUp';
 import Placeholder  from './pages/Placeholder';
 
 function PrivateRoute({ children }) {
@@ -29,7 +30,8 @@ function PrivateRoute({ children }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/login" element={<Login />} />
+      <Route path="/login"  element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
       <Route path="/*" element={
         <PrivateRoute>
           <AppLayout>

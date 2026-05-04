@@ -1,5 +1,6 @@
 const LeaveRequest = require('../models/LeaveRequest');
 const Employee     = require('../models/Employee');
+const { createNotification } = require('./notificationController');
 
 const daysBetween = (a, b) =>
   Math.ceil((new Date(b) - new Date(a)) / (1000 * 60 * 60 * 24)) + 1;
@@ -25,6 +26,20 @@ exports.applyLeave = async (req, res) => {
     const leave = await LeaveRequest.create({
       employee: req.user._id, leaveType, startDate, endDate, days, reason,
     });
+
+    // Notify all HR officers and admins
+    const managers = await Employee.find({ role: { $in: ['admin','hr_officer'] }, status: 'Active' });
+    for (const mgr of managers) {
+      await createNotification({
+        recipient: mgr._id,
+        type: 'leave_request',
+        title: '📋 New Leave Request',
+        body: `${emp.firstName} ${emp.lastName} requested ${days} days of ${leaveType} leave`,
+        link: '/schedule',
+        priority: 'normal',
+        icon: '📋',
+      });
+    }
 
     res.status(201).json({ success: true, data: leave });
   } catch (err) {
@@ -67,6 +82,17 @@ exports.reviewLeave = async (req, res) => {
     leave.reviewedAt = new Date();
     leave.reviewNote = reviewNote;
     await leave.save();
+
+    // Notify the employee of the decision
+    await createNotification({
+      recipient: leave.employee._id,
+      type: status === 'Approved' ? 'leave_approved' : 'leave_rejected',
+      title: status === 'Approved' ? '✅ Leave Approved' : '❌ Leave Rejected',
+      body: `Your ${leave.leaveType} leave request (${leave.days} days) has been ${status.toLowerCase()}.${reviewNote ? ' Note: ' + reviewNote : ''}`,
+      link: '/schedule',
+      priority: status === 'Rejected' ? 'high' : 'normal',
+      icon: status === 'Approved' ? '✅' : '❌',
+    });
 
     if (status === 'Approved') {
       const emp = await Employee.findById(leave.employee._id);

@@ -2,6 +2,7 @@ const Employee = require('../models/Employee');
 const bcrypt   = require('bcryptjs');
 const jwt      = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const { createNotification } = require('./notificationController');
 
 const signToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE });
@@ -17,6 +18,18 @@ exports.register = async (req, res) => {
 
     const employee = await Employee.create({ ...rest, employeeId, password: hashed });
     const token = signToken(employee._id);
+
+    // Welcome notification
+    await createNotification({
+      recipient: employee._id,
+      type: 'welcome',
+      title: '👋 Welcome to Bahrain HRMS!',
+      body: `Your account has been created. Employee ID: ${employee.employeeId}`,
+      link: '/account',
+      priority: 'normal',
+      icon: '👋',
+    });
+
     res.status(201).json({ success: true, token, data: { employeeId: employee.employeeId, role: employee.role } });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });
