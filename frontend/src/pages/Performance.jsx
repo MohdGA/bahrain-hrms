@@ -122,7 +122,7 @@ export default function Performance() {
       {/* Overview tab */}
       {tab === 'overview' && (
         <>
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
               { icon: Users,     label:'Reviewed',       value: reviews?.length ?? 0,          color:'bg-primary' },
               { icon: Star,      label:'Avg Team Score',  value: avgScore,                      color:'bg-amber-400' },
@@ -210,7 +210,7 @@ export default function Performance() {
 
               {expanded === r._id && (
                 <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     {r.kpis?.map((k, i) => (
                       <div key={i} className="bg-gray-50 rounded-xl p-3">
                         <p className="text-xs font-medium text-gray-700">{k.title}</p>
@@ -312,7 +312,7 @@ export default function Performance() {
               <button onClick={() => setShowModal(false)}><X size={18} className="text-gray-400" /></button>
             </div>
             <div className="flex-1 overflow-y-auto p-6 space-y-5">
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Employee *</label>
                   <select value={form.employeeId} onChange={e => setForm(p => ({...p, employeeId: e.target.value}))}

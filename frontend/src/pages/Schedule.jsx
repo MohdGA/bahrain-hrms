@@ -70,7 +70,7 @@ export default function Schedule() {
       </div>
 
       {/* Leave types info */}
-      <div className="grid grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
           { type:'Annual',    days:'30 days/year',        color:'bg-blue-50 text-blue-700' },
           { type:'Sick',      days:'15 days/year',        color:'bg-green-50 text-green-700' },

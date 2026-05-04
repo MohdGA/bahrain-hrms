@@ -162,7 +162,7 @@ export default function Settings() {
               </div>
 
               <SectionTitle>Working Hours</SectionTitle>
-              <div className="grid grid-cols-3 gap-4 mb-5">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
                 <div>
                   <label className="text-xs font-medium text-gray-600 mb-1 block">Normal Hours/Day</label>
                   <input type="number" value={form.workingHours?.normal || 8} onChange={setNested('workingHours','normal')} disabled={!isAdmin}

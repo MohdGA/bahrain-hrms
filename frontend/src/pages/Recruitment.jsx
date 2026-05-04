@@ -121,7 +121,7 @@ export default function Recruitment() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard icon={Briefcase}   label="Open Positions"    value={stats?.totalJobs}  color="bg-primary" />
         <StatCard icon={Users}       label="Total Applicants"  value={stats?.totalApps}  color="bg-purple-500" />
         <StatCard icon={CheckCircle} label="Hired This Cycle"  value={stats?.hired}      color="bg-green-500" />
@@ -130,7 +130,7 @@ export default function Recruitment() {
 
       {/* Jobs View */}
       {view === 'jobs' && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {(!jobs || jobs.length === 0) && (
             <div className="col-span-3 card text-center py-12 text-gray-400">
               <Briefcase size={32} className="mx-auto mb-2 opacity-30" />

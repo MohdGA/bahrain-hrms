@@ -88,7 +88,7 @@ export default function Projects() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { label:'Total',     value: stats?.total,     color:'bg-gray-700' },
           { label:'Active',    value: stats?.active,    color:'bg-blue-500' },
@@ -104,7 +104,7 @@ export default function Projects() {
       </div>
 
       {/* Projects Grid */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {(!filtered || filtered.length === 0) && (
           <div className="col-span-3 card text-center py-12 text-gray-400">
             <FolderKanban size={32} className="mx-auto mb-2 opacity-30" />

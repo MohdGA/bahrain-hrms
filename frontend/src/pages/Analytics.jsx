@@ -34,7 +34,7 @@ export default function Analytics() {
       </div>
 
       {/* KPI cards */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label:'Total Active',      value: stats?.totalEmployees?.value ?? '—',      color:'text-primary' },
           { label:'Bahraini Staff',     value: stats?.bahrainis ?? '—',                  color:'text-blue-600' },
@@ -50,7 +50,7 @@ export default function Analytics() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Department breakdown */}
         <div className="card">
           <h3 className="font-semibold text-gray-800 mb-4">Staff by Department</h3>
@@ -88,7 +88,7 @@ export default function Analytics() {
         </div>
 
         {/* Nationality breakdown */}
-        <div className="card col-span-2">
+        <div className="card md:col-span-2">
           <h3 className="font-semibold text-gray-800 mb-4">Staff by Nationality</h3>
           {!employees ? <Skeleton /> : nationalityData.length === 0 ? (
             <p className="text-sm text-gray-400 text-center py-10">No data yet</p>

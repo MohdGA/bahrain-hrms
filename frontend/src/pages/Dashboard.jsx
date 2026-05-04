@@ -50,9 +50,9 @@ export default function Dashboard() {
   return (
     <div className="space-y-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Dashboard Overview</h1>
+          <h1 className="text-lg md:text-xl font-bold text-gray-900">Dashboard Overview</h1>
           <p className="text-sm text-gray-500 mt-0.5">Live snapshot of your HR operations</p>
         </div>
         <div className="flex gap-2">
@@ -66,7 +66,7 @@ export default function Dashboard() {
       </div>
 
       {/* Row 1: Stats + Demographics */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {statsLoading ? (
           [1,2,3].map(i => <div key={i} className="card"><Skeleton className="h-20 w-full" /></div>)
         ) : (
@@ -114,7 +114,7 @@ export default function Dashboard() {
       </div>
 
       {/* Row 2: Bahrainisation + Expiry Radar */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Bahrainisation */}
         <div className="card">
           <h3 className="font-semibold text-gray-800 mb-3">Bahrainisation Quota</h3>
@@ -182,7 +182,8 @@ export default function Dashboard() {
           <a href="/employees" className="text-xs text-primary font-medium">{t('seeAll')}</a>
         </div>
         {recentLoading ? <Skeleton className="h-32 w-full" /> : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-2 px-2">
+          <table className="w-full text-sm min-w-[480px]">
             <thead>
               <tr className="text-xs text-gray-400 border-b border-gray-100">
                 <th className="text-left pb-2 font-medium">Employee</th>
@@ -217,6 +218,7 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

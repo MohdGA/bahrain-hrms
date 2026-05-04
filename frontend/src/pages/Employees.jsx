@@ -232,7 +232,7 @@ export default function Employees() {
         {loading ? (
           <div className="text-center py-12 text-gray-400 text-sm">Loading employees...</div>
         ) : (
-          <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-1 px-1"><table className="w-full text-sm min-w-[640px]">
             <thead>
               <tr className="text-xs text-gray-400 border-b border-gray-100">
                 <th className="text-left pb-3 font-medium">Employee</th>
@@ -270,14 +270,14 @@ export default function Employees() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 
       {/* ── Add Employee Modal ── */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-xl">
+          <div className="bg-white rounded-none md:rounded-2xl w-full md:max-w-2xl h-full md:max-h-[90vh] flex flex-col shadow-xl">
 
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
