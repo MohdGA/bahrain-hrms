@@ -9,40 +9,47 @@ const signToken = (id) =>
 
 exports.register = async (req, res) => {
   try {
-    const { password, position, ...rest } = req.body;
-    const hashed = await bcrypt.hash(password, 12);
+    const { password, position, firstName, lastName, email, department, isBahraini } = req.body;
 
-    // Auto-generate employeeId
-    const count = await Employee.countDocuments();
+    if (!password || !firstName || !lastName || !email || !department) {
+      return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    const hashed = await bcrypt.hash(password, 12);
+    const count  = await Employee.countDocuments();
     const employeeId = `EMP-${String(count + 1).padStart(4, '0')}`;
 
-    // Provide safe defaults for required schema fields not collected at sign-up
-    const defaults = {
+    const employee = await Employee.create({
+      firstName,
+      lastName,
+      email,
+      department,
+      isBahraini: isBahraini || false,
       designation:  position || 'Employee',
       nationality:  'Not Specified',
       cprNumber:    `PENDING-${employeeId}`,
       basicSalary:  mongoose.Types.Decimal128.fromString('0'),
       joinDate:     new Date(),
-    };
+      employeeId,
+      password:     hashed,
+    });
 
-    const employee = await Employee.create({ ...defaults, ...rest, employeeId, password: hashed });
     const token = signToken(employee._id);
 
-    // Welcome notification
     await createNotification({
       recipient: employee._id,
-      type: 'welcome',
-      title: '👋 Welcome to Bahrain HRMS!',
-      body: `Your account has been created. Employee ID: ${employee.employeeId}`,
-      link: '/account',
+      type:     'welcome',
+      title:    '👋 Welcome to Bahrain HRMS!',
+      body:     `Your account has been created. Employee ID: ${employee.employeeId}`,
+      link:     '/account',
       priority: 'normal',
-      icon: '👋',
+      icon:     '👋',
     });
 
     res.status(201).json({
       success: true,
       token,
-      data: { id: employee._id, employeeId: employee.employeeId, role: employee.role, name: employee.fullName },
+      data: { id: employee._id, role: employee.role, name: `${firstName} ${lastName}` },
     });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

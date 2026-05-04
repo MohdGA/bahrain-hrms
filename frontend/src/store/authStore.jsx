@@ -4,28 +4,34 @@ import api from '../utils/api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [user, setUser]     = useState(null);
+  const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Restore session on page load
   useEffect(() => {
     const token = localStorage.getItem('token');
     const saved = localStorage.getItem('user');
-    if (token && saved) setUser(JSON.parse(saved));
+    if (token && saved) {
+      try { setUser(JSON.parse(saved)); } catch {}
+    }
     setLoading(false);
   }, []);
 
+  // Sign in — called from Login page
   const login = async (email, password) => {
-    const { data } = await api.post('/employees/login', { email, password });
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.data));
-    setUser(data.data);
-    return data.data;
+    const res = await api.post('/employees/login', { email, password });
+    const { token, data } = res.data;          // data = { id, role, name }
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+    return data;
   };
 
-  const setAuth = (token, userData) => {
+  // Sign up — called from SignUp page after successful register API call
+  const setAuth = (token, data) => {           // data = { id, role, name }
     localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
   };
 
   const logout = () => {
@@ -35,7 +41,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, setAuth, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, login, setAuth, logout }}>
       {children}
     </AuthContext.Provider>
   );
