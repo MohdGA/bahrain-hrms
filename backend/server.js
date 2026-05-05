@@ -30,8 +30,20 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
+// General rate limit — all API routes
 const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 app.use('/api/', limiter);
+
+// Strict rate limit on auth endpoints — max 10 attempts per 15 min per IP
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: { success: false, message: 'Too many attempts. Please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/employees/login',    authLimiter);
+app.use('/api/employees/register', authLimiter);
 
 // Routes
 app.use('/api/employees',     require('./routes/employees'));

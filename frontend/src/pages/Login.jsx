@@ -84,9 +84,6 @@ export default function Login() {
           </Link>
         </p>
 
-        <div className="mt-4 p-3 bg-blue-50 rounded-xl text-center">
-          <p className="text-xs text-blue-500 font-medium">Demo: admin@hrms.bh · Admin@1234</p>
-        </div>
       </div>
     </div>
   );

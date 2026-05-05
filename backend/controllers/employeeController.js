@@ -15,6 +15,20 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
+    // Server-side password strength check
+    if (password.length < 8) {
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters.' });
+    }
+    if (!/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+      return res.status(400).json({ success: false, message: 'Password must include at least one uppercase letter and one number.' });
+    }
+
+    // Check if email already exists (clean error message)
+    const existing = await Employee.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'An account with this email already exists.' });
+    }
+
     const hashed = await bcrypt.hash(password, 12);
     const count  = await Employee.countDocuments();
     const employeeId = `EMP-${String(count + 1).padStart(4, '0')}`;
@@ -52,6 +66,10 @@ exports.register = async (req, res) => {
       data: { id: employee._id, role: employee.role, name: `${firstName} ${lastName}` },
     });
   } catch (err) {
+    // Catch any remaining duplicate key errors from MongoDB
+    if (err.code === 11000) {
+      return res.status(400).json({ success: false, message: 'An account with this email already exists.' });
+    }
     res.status(400).json({ success: false, message: err.message });
   }
 };

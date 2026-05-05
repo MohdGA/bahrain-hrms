@@ -32,8 +32,12 @@ export default function SignUp() {
     e.preventDefault();
     setError('');
 
-    if (form.password.length < 6) {
-      setError('Password must be at least 6 characters.');
+    if (form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
+    if (!/[A-Z]/.test(form.password) || !/[0-9]/.test(form.password)) {
+      setError('Password must include at least one uppercase letter and one number.');
       return;
     }
 
@@ -114,7 +118,7 @@ export default function SignUp() {
               required
               value={form.password}
               onChange={change}
-              placeholder="Min. 6 characters"
+              placeholder="Min. 8 chars, 1 uppercase, 1 number"
               className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
