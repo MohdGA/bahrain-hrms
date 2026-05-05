@@ -77,7 +77,7 @@ exports.register = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const employee = await Employee.findOne({ email }).select('+password');
+    const employee = await Employee.findOne({ email: email.toLowerCase().trim() }).select('+password');
     if (!employee || !(await bcrypt.compare(password, employee.password))) {
       return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
@@ -111,6 +111,11 @@ exports.getAllEmployees = async (req, res) => {
 
 exports.getEmployee = async (req, res) => {
   try {
+    // Employees can only view their own profile; HR/admin can view anyone
+    const isPrivileged = ['admin','hr_officer','finance_manager','wrp'].includes(req.user.role);
+    if (!isPrivileged && req.params.id !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Not authorized to view this profile' });
+    }
     const employee = await Employee.findById(req.params.id).select('-password');
     if (!employee) return res.status(404).json({ success: false, message: 'Employee not found' });
     res.json({ success: true, data: employee });
@@ -121,7 +126,18 @@ exports.getEmployee = async (req, res) => {
 
 exports.updateEmployee = async (req, res) => {
   try {
-    const { password, ...updates } = req.body;
+    // Whitelist updatable fields — prevents role escalation and mass assignment
+    const allowed = [
+      'firstName','lastName','firstNameAr','lastNameAr','phone','dateOfBirth','gender',
+      'nationality','religion','photo','department','designation','employmentType',
+      'housingAllowance','transportAllowance','socialAllowance','otherAllowances',
+      'iban','bankName','workPermitNumber','workPermitExpiry','passportNumber',
+      'passportExpiry','cprExpiry','visaNumber','visaExpiry','cprNumber','basicSalary',
+      'homeAddress','annualLeaveBalance','sickLeaveBalance','hajjLeaveUsed',
+    ];
+    const updates = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+
     const employee = await Employee.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).select('-password');
     if (!employee) return res.status(404).json({ success: false, message: 'Employee not found' });
     res.json({ success: true, data: employee });

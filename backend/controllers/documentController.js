@@ -3,7 +3,10 @@ const Employee = require('../models/Employee');
 
 exports.addDocument = async (req, res) => {
   try {
-    const doc = await Document.create({ ...req.body, employee: req.params.employeeId });
+    const allowed = ['documentType','documentNumber','issueDate','expiryDate','issuedBy','notes'];
+    const fields = { employee: req.params.employeeId };
+    allowed.forEach(f => { if (req.body[f] !== undefined) fields[f] = req.body[f]; });
+    const doc = await Document.create(fields);
     res.status(201).json({ success: true, data: doc });
   } catch (err) {
     res.status(400).json({ success: false, message: err.message });

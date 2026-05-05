@@ -57,7 +57,10 @@ exports.getSent = async (req, res) => {
 
 exports.getMessage = async (req, res) => {
   try {
-    const msg = await Message.findById(req.params.id)
+    const msg = await Message.findOne({
+      _id: req.params.id,
+      $or: [{ sender: req.user._id }, { recipient: req.user._id }],
+    })
       .populate('sender', 'firstName lastName department')
       .populate('recipient', 'firstName lastName department');
     if (!msg) return res.status(404).json({ success: false, message: 'Message not found' });

@@ -12,9 +12,14 @@ exports.getReviews = async (req, res) => {
   try {
     const { employeeId, period, status } = req.query;
     const filter = {};
-    if (employeeId) filter.employee = employeeId;
-    if (period)     filter.period   = period;
-    if (status)     filter.status   = status;
+    // Non-managers can only see their own reviews
+    if (!['admin','hr_officer'].includes(req.user.role)) {
+      filter.employee = req.user._id;
+    } else {
+      if (employeeId) filter.employee = employeeId;
+    }
+    if (period) filter.period = period;
+    if (status) filter.status = status;
     const reviews = await PerformanceReview.find(filter)
       .populate('employee', 'firstName lastName employeeId department designation')
       .populate('reviewer', 'firstName lastName')
@@ -25,7 +30,10 @@ exports.getReviews = async (req, res) => {
 
 exports.updateReview = async (req, res) => {
   try {
-    const review = await PerformanceReview.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true })
+    const allowed = ['kpis','overallScore','strengths','improvements','goals','period','periodType','status'];
+    const updates = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+    const review = await PerformanceReview.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true })
       .populate('employee', 'firstName lastName')
       .populate('reviewer', 'firstName lastName');
     res.json({ success: true, data: review });

@@ -24,7 +24,11 @@ exports.getProjects = async (req, res) => {
 
 exports.updateProject = async (req, res) => {
   try {
-    const project = await Project.findByIdAndUpdate(req.params.id, req.body, { new: true })
+    const allowed = ['title','description','client','status','priority','startDate','deadline','budget','team','tags','progress'];
+    const updates = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+
+    const project = await Project.findByIdAndUpdate(req.params.id, updates, { new: true })
       .populate('manager', 'firstName lastName')
       .populate('team', 'firstName lastName');
     res.json({ success: true, data: project });

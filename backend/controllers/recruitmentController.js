@@ -27,7 +27,10 @@ exports.getJobs = async (req, res) => {
 
 exports.updateJob = async (req, res) => {
   try {
-    const job = await Job.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const allowed = ['title','department','type','location','description','deadline','salaryMin','salaryMax','status'];
+    const updates = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+    const job = await Job.findByIdAndUpdate(req.params.id, updates, { new: true });
     res.json({ success: true, data: job });
   } catch (err) { res.status(400).json({ success: false, message: err.message }); }
 };
@@ -63,11 +66,11 @@ exports.getApplications = async (req, res) => {
 
 exports.updateApplicationStage = async (req, res) => {
   try {
-    const app = await Application.findByIdAndUpdate(
-      req.params.id,
-      { ...req.body, reviewedBy: req.user._id },
-      { new: true }
-    ).populate('job', 'title');
+    const allowed = ['stage','rating','interviewDate','offerSalary','notes'];
+    const updates = { reviewedBy: req.user._id };
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+    const app = await Application.findByIdAndUpdate(req.params.id, updates, { new: true })
+      .populate('job', 'title');
     res.json({ success: true, data: app });
   } catch (err) { res.status(400).json({ success: false, message: err.message }); }
 };

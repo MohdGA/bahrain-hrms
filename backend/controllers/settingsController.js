@@ -10,9 +10,17 @@ exports.getSettings = async (req, res) => {
 
 exports.updateSettings = async (req, res) => {
   try {
+    const allowed = [
+      'companyName','companyNameAr','crNumber','industry','address','phone','email',
+      'website','logo','currency','dateFormat','timezone','language',
+      'workingDays','workingHours','fiscalYearStart',
+    ];
+    const updates = {};
+    allowed.forEach(f => { if (req.body[f] !== undefined) updates[f] = req.body[f]; });
+
     const settings = await CompanySettings.findOneAndUpdate(
       { singleton: 'settings' },
-      { $set: req.body },
+      { $set: updates },
       { new: true, upsert: true }
     );
     res.json({ success: true, data: settings });
