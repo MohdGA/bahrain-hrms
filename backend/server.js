@@ -14,19 +14,20 @@ connectDB();
 // Security
 app.use(helmet({ contentSecurityPolicy: false }));
 
-// CORS — restrict to known origins only
-const allowedOrigins = process.env.CORS_ORIGIN
-  ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
-  : ['http://localhost:5173', 'http://localhost:3000'];
-
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (Postman, mobile apps, same-server requests)
-    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-    callback(new Error('CORS: origin not allowed'));
-  },
-  credentials: true,
-}));
+// CORS — enforce allowlist only if CORS_ORIGIN is explicitly set in env
+// (when frontend and backend share the same Render domain, no restriction needed)
+if (process.env.CORS_ORIGIN) {
+  const allowedOrigins = process.env.CORS_ORIGIN.split(',').map(o => o.trim());
+  app.use(cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      callback(new Error('CORS: origin not allowed'));
+    },
+    credentials: true,
+  }));
+} else {
+  app.use(cors()); // permissive — safe since all data routes are JWT-protected
+}
 app.use(express.json({ limit: '10mb' }));
 app.use(morgan('dev'));
 
